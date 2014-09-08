@@ -1,0 +1,7 @@
+<project name="comark" url="http://github.com/constnw/comark/" license="BSD">
+    <user name="constnw"/>
+    <tag v="cross"/>
+    <tag v="utility"/>
+    <description>Comark is CommonMark (Markdown) library.</description>
+    <version name="0.0.1">initial</version>
+</project>
