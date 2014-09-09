@@ -30,7 +30,7 @@ class InlineParser
 	
 	// Matches a character with a special meaning in markdown,
 	// or a string of non-special characters.
-	static var reMain = ~/^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/m;
+	var reMain : EReg;
 	
 	static var reEscapable = new EReg(DocParser.ESCAPABLE, '');
 	
@@ -55,6 +55,8 @@ class InlineParser
 
 	public function new( )
 	{
+		reMain = ~/^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/m;
+		
 		subject = '';
 		label_nest_level = 0;
 		pos = 0;
@@ -83,22 +85,25 @@ class InlineParser
 	function parseInline( inlines : Array<InlineElement> ) : Int
 	{
 		var c = peek();
-		var res : Int = null;
 		
-		switch( c )
-		{
-			case '\n':     res = parseNewline(inlines);
-			case '\\':     res = parseEscaped(inlines);
-			case '`':      res = parseBackticks(inlines);
-			case '*', '_': res = parseEmphasis(inlines);
-			case '[':      res = parseLink(inlines);
-			case '!':      res = parseImage(inlines);
-			case '<':      res = parseAutolink(inlines); if ( res == 0 ) res = parseHtmlTag(inlines);
-			case '&':      res = parseEntity(inlines);
-			case _:
-		}
-		
+		var res : Int = applyParsers(c, inlines);
 		return res > 0 ? res :  parseString(inlines);
+	}
+	
+	function applyParsers( c : String, inlines : Array<InlineElement> ) : Int
+	{
+		return switch( c )
+		{
+			case '\n':     parseNewline(inlines);
+			case '\\':     parseEscaped(inlines);
+			case '`':      parseBackticks(inlines);
+			case '*', '_': parseEmphasis(inlines);
+			case '[':      parseLink(inlines);
+			case '!':      parseImage(inlines);
+			case '<':      var res = parseAutolink(inlines); res > 0 ? res : parseHtmlTag(inlines);
+			case '&':      parseEntity(inlines);
+			case _: 0;
+		}
 	}
 	
 	// Attempt to parse a link reference, modifying refmap.

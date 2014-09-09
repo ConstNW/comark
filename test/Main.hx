@@ -2,6 +2,7 @@
  * ...
  * @author Const
  */
+import comark.GithubMarkdown;
 import haxe.macro.Context;
 import haxe.Resource;
 import haxe.unit.TestRunner;
@@ -72,9 +73,11 @@ class Main
 					     if ( example ==   2 ) { }   // UTF german
 					else if ( example == 110 ) { }   // UTF greek
 					else if ( example == 349 ) { }   // UTF russian
-					else
+					else 
 #end
-						r.add(new StringTest(new Markdown(), ~/␣/g.replace(~/→/g.replace(markdown, '\t'), ' '), html, header, example, exampleLine));
+						 if ( example ==  25 ) { }   // Github Flavour #hashtag
+					else
+						r.add(new StringTest(new GithubMarkdown(), ~/␣/g.replace(~/→/g.replace(markdown, '\t'), ' '), html, header, example, exampleLine));
 					
 					markdown = '';
 					html = '';
