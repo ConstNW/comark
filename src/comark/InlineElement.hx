@@ -12,4 +12,5 @@ typedef InlineElement = {
 	
 	@:optional var childs : Array<InlineElement>;
 	@:optional var label : Array<InlineElement>;
+	//@:optional var childs : Array<InlineElement>;
 };

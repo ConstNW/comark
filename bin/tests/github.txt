@@ -1,0 +1,43 @@
+---
+title: CommonMark Github flavour Spec
+author:
+- ConstNW
+version: 0.1
+date: 2014-10-29
+...
+
+
+# Strike
+
+
+.
+~~foo~~
+.
+<p><del>foo</del></p>
+.
+
+# No Strike
+
+.
+~~foo
+.
+<p>~~foo</p>
+.
+
+# Hashtag
+
+.
+#hashtag
+.
+<p><a href="/hashtag/hashtag">#hashtag</a></p>
+.
+
+.
+#hash tag
+.
+<p><a href="/hashtag/hash">#hash</a> tag</p>
+.
+
+<!-- END TESTS -->
+
+# Appendix 

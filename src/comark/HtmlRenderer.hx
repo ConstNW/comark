@@ -9,18 +9,25 @@ using StringTools;
 
 class HtmlRenderer
 {
+	public var header_start : Int;
+	public var allow_html : Bool;
+	
     // default options:
     var blocksep : String; // '\n', // space between blocks
     var innersep : String; // '\n', // space between block container tag and contents
     var softbreak: String; // '\n', // by default, soft breaks are rendered as newlines in HTML
 									// set to "<br />" to make them hard breaks
 									// set to " " if you want to ignore line wrapping in source
+	//var asd : String;
 	
 	public function new( )
 	{
 		blocksep = '\n';
 		innersep = '\n';
 		softbreak = '\n';
+		
+		header_start = 1;
+		allow_html = true;
 	}
 	
 	public function render( block : BlockElement ) return renderBlock(block);
@@ -66,10 +73,7 @@ class HtmlRenderer
 				return inTags('strong', [], renderInlines(inlineHtml.childs));
 			
 			case 'Html':
-				return inlineHtml.c;
-			
-			case 'Entity':
-				return inlineHtml.c;
+				return allow_html ? inlineHtml.c : escape(inlineHtml.c);
 			
 			case 'Link':
 				attrs = [['href', escape(inlineHtml.destination, true)]];
@@ -143,7 +147,7 @@ class HtmlRenderer
 				return inTags(tag, attr, innersep + renderBlocks(block.children, block.tight) + innersep);
 			
 			case 'ATXHeader', 'SetextHeader':
-				tag = 'h' + block.level;
+				tag = 'h' + Std.int(Math.min(6, header_start - 1 + block.level));
 				return inTags(tag, [], renderInlines(block.inline_content));
 			
 			case 'IndentedCode':
@@ -156,7 +160,7 @@ class HtmlRenderer
 				return inTags('pre', [], inTags('code', attr, escape(block.string_content)));
 			
 			case 'HtmlBlock':
-				return block.string_content;
+				return allow_html ? block.string_content : escape(block.string_content);
 			
 			case 'ReferenceDef':
 				return "";
@@ -196,3 +200,35 @@ class HtmlRenderer
 		return r;
 	}
 }
+
+/*
+// The HtmlRenderer object.
+function HtmlRenderer(){
+  return {
+    // default options:
+    blocksep: '\n',  // space between blocks
+    innersep: '\n',  // space between block container tag and contents
+    softbreak: '\n', // by default, soft breaks are rendered as newlines in HTML
+                     // set to "<br />" to make them hard breaks
+                     // set to " " if you want to ignore line wrapping in source
+    escape: function(s, preserve_entities) {
+      if (preserve_entities) {
+      return s.replace(/[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)/gi,'&amp;')
+              .replace(/[<]/g,'&lt;')
+              .replace(/[>]/g,'&gt;')
+              .replace(/["]/g,'&quot;');
+      } else {
+      return s.replace(/[&]/g,'&amp;')
+              .replace(/[<]/g,'&lt;')
+              .replace(/[>]/g,'&gt;')
+              .replace(/["]/g,'&quot;');
+      }
+    },
+    renderInline: renderInline,
+    renderInlines: renderInlines,
+    renderBlock: renderBlock,
+    renderBlocks: renderBlocks,
+    render: renderBlock
+  };
+}
+*/

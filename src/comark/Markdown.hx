@@ -4,12 +4,11 @@
  */
 package comark;
 
-
 class Markdown
 {
 	var render : HtmlRenderer;
 	var parser : DocParser;
-
+	
 	public function new( )
 	{
 		render = new HtmlRenderer();

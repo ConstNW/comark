@@ -17,9 +17,6 @@ class DocParser
 	static var HTMLBLOCKOPEN = "<(?:" + BLOCKTAGNAME + "[\\s/>]" + "|" + "/" + BLOCKTAGNAME + "[\\s>]" + "|" + "[?!])";
 	static var reHtmlBlockOpen = new EReg('^' + HTMLBLOCKOPEN, 'i');
 	
-	public static var ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]';
-	public static var reAllEscapedChar = new EReg('\\\\(' + ESCAPABLE + ')', 'g');
-	
 	var doc : BlockElement;
 	var tip : BlockElement;
 	
@@ -54,7 +51,7 @@ class DocParser
 		var i = 0;
 		do incorporateLine(lines[i], i+1) while ( len > ++i );
 		
-		while ( tip != null ) finalize(tip, len - 1);
+		while ( tip != null ) { finalize(tip, len - 1); }
 		
 		processInlines(doc);
 		
@@ -254,7 +251,10 @@ class DocParser
 				
 				// remove trailing ###s:
 				var s = ln.substr(offset);
-				container.strings = [~/(?:(\\#) *#*| *#+) *$/.replace(s, '$1')];
+				container.strings = [
+					~/ +#+ *$/.replace(
+						~/^ *#+ *$/.replace(s, ''), '')
+				];
 				break;
 			}
 			else if ( erCode.match(ln.substr(first_nonspace)) )
@@ -455,7 +455,7 @@ class DocParser
 			
 			case 'FencedCode':
 				// first line becomes info string
-				block.info = unescape(block.strings[0].trim());
+				block.info = InlineParser.unescapeString(block.strings[0].trim());
 				if ( block.strings.length == 1 )
 					block.string_content = '';
 				else
@@ -579,14 +579,6 @@ class DocParser
 			lastStop = offset + 1;
 			return result;
 		});
-		
-		/*
-		return text.replace(reAllTab, function(match, offset) {
-			var result = '    '.slice((offset - lastStop) % 4);
-			lastStop = offset + 1;
-			return result;
-		});
-		*/
 	}
 	
 	// Attempt to match a regex in string s at offset offset.
@@ -694,9 +686,6 @@ class DocParser
 	// Returns true if block type can accept lines of text.
 	function acceptsLines( block_type : String ) : Bool return ( block_type == 'Paragraph' || block_type == 'IndentedCode' || block_type == 'FencedCode' );
 	
-	// Replace backslash escapes with literal characters.
-	function unescape( s ) return reAllEscapedChar.replace(s, '$1');
-
 	// Returns true if string contains only space characters.
 	function isBlank(s) return ~/^\s*$/.match(s);
 	
@@ -713,4 +702,12 @@ class DocParser
 		else
 			return false;
 	}
+/*
+    breakOutOfLists: breakOutOfLists,
+    addLine: addLine,
+    addChild: addChild,
+    incorporateLine: incorporateLine,
+    finalize: finalize,
+    processInlines: processInlines,
+*/
 }

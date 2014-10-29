@@ -12,31 +12,32 @@ class GithubInlineParser extends InlineParser
 	public function new( )
 	{
 		super();
-		
-		reMain  = ~/^(?:[\n`\[\]\\!<&*_~]|[^\n`\[\]\\!<&*_~]+)/m;
+				  //~/^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/m;
+		reMain  = //~/^(?:[\n`\[\]\\!<&*_~]|[^\n`\[\]\\!<&*_~]+)/m;
+		            ~/^(?:[_*`\n]+|[\[\]\\!<&*_]|(?: *[^\n `\[\]\\!<&*_~]+)+|[ \n]+)/m;
 	}
 	
-	override function applyParsers( c : String, inlines : Array<InlineElement> ) : Int 
+	override function applyParsers( c : Int, inlines : Array<InlineElement> ) : Bool
 	{
 		return switch( c )
 		{
-			case '~': parseStrike(inlines);
-			case '#': parseHashtag(inlines);
+			case '~'.code: parseStrike(inlines);
+			case '#'.code: parseHashtag(inlines);
 			
 			case _: super.applyParsers(c, inlines);
 		}
 	}
 	
-	
-	function parseStrike( inlines : Array<InlineElement> ) : Int
+	function parseStrike( inlines : Array<InlineElement> ) : Bool
 	{
 		var startpos : Int = this.pos;
-		var c : String;
+		var c : Int;
 		var first_close : Int = 0;
-		var nxt : String = this.peek();
-		if ( nxt == '~' ) c = nxt;
+		
+		var nxt : Int = this.peek();
+		if ( nxt == '~'.code ) c = nxt;
 		else
-			return 0;
+			return false;
 		
 		// Get opening delimiters.
 		var res = this.scanDelims(c);
@@ -54,12 +55,13 @@ class GithubInlineParser extends InlineParser
 		var delimpos = inlines.length - 1;
 		
 		if ( !res.can_open || numdelims != 2 )
-			return 0;
+			return false;
 		
 		// We started with ~~
 		while ( true )
 		{
 			res = this.scanDelims(c);
+			
 			if ( res.numdelims >= 2 && res.can_close )
 			{
 				this.pos += 2;
@@ -68,19 +70,19 @@ class GithubInlineParser extends InlineParser
 				inlines.splice(delimpos + 1, inlines.length);
 				break;
 			}
-			else if ( this.parseInline(inlines) == 0 )
+			else if( !this.parseInline(inlines) )
 				break;
 		}
 		
-		return (this.pos - startpos);
+		return (this.pos != startpos);
 	}
 	
-	function parseHashtag( inlines : Array<InlineElement> ) : Int
+	function parseHashtag( inlines : Array<InlineElement> ) : Bool
 	{
 		// Entity
 		var prev = subject.charAt(pos - 1);
 		if ( pos > 0 && prev != ' ' ) 
-			return 0;
+			return false;
 		
 		var startpos : Int = this.pos;
 		this.pos++;
@@ -93,12 +95,12 @@ class GithubInlineParser extends InlineParser
 				//title: m,
 				label: [ { t: 'Str', c: '#$m' } ],
 			});
-			return m.length;
+			return true;
 		}
 		else
 		{
 			this.pos = startpos;
-			return 0;
+			return false;
 		}
 	}
 }

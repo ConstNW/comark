@@ -4,8 +4,8 @@
   "tags": ["cross","utility"],
   "description": "Comark is CommonMark (Markdown) library.",
   "contributors": ["constnw"],
-  "releasenote": "Github Flavor added",
-  "version": "0.0.2",
+  "releasenote": "Updated to CommonMark spec v0.6",
+  "version": "0.0.3",
   "url": "http://github.com/constnw/comark/",
   "dependencies": {
 
