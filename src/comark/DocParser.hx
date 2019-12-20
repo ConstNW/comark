@@ -505,7 +505,7 @@ class DocParser
 	// into inline content where appropria
 	function processInlines( block : BlockElement ) : Void
 	{
-		switch( block.t )
+		switch (block.t)
 		{
 			case 'Paragraph', 'SetextHeader', 'ATXHeader':
 				block.inline_content = inlineParser.parse(block.string_content.trim(), refmap);
@@ -514,8 +514,9 @@ class DocParser
 			case _:
 		}
 		
-		if ( block.children != null ) for( c in block.children )
-			processInlines(c);
+		if (block.children != null)
+			for (c in block.children)
+				processInlines(c);
 	}
 	
 	

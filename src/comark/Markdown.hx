@@ -1,7 +1,3 @@
-/**
- * ...
- * @author ...
- */
 package comark;
 
 class Markdown

@@ -6,6 +6,7 @@
   "contributors": ["constnw"],
   "releasenote": "Updated to CommonMark spec v0.6",
   "version": "0.0.3",
+  "classPath": "src/",
   "url": "http://github.com/constnw/comark/",
   "dependencies": {
 

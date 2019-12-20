@@ -1,11 +1,9 @@
-/**
- * ...
- * @author ...
- */
 package comark;
+
 import haxe.ds.StringMap;
 
 using StringTools;
+
 
 typedef EmphasisOpener = {
 	var cc : Int; // cc,
@@ -101,7 +99,7 @@ class InlineParser
 		this.refmap = refmap != null ? refmap : new StringMap();
 		
 		var inlines : Array<InlineElement> = [];
-		while ( parseInline(inlines) ) { }
+		while (parseInline(inlines)) { }
 		return inlines;
 	}
 	
@@ -120,11 +118,13 @@ class InlineParser
 		var origlen = inlines.length;
 		
 		var c = peek();
-		if ( c == -1 )
+		if (c == -1)
 			return false;
 		
+try
+{
 		var res : Bool = applyParsers(c, inlines);
-		if ( !res )
+		if (!res)
 		{
 			pos += 1;
 			inlines.push({
@@ -132,35 +132,39 @@ class InlineParser
 				c: EntityToChar.fromCodePoint([c])
 			});
 		}
+}
+catch (e : Dynamic)
+{
+	trace(e, haxe.CallStack.toString(haxe.CallStack.exceptionStack()));
+	trace(c);
+	trace(inlines);
+}
 		
 		return true;
 		// return res > 0 ? res :  parseString(inlines);
 	}
 	
-	function applyParsers( c : Int, inlines : Array<InlineElement> ) : Bool
+	function applyParsers( c : Int, inlines : Array<InlineElement> ) : Bool return switch (c)
 	{
-		return switch( c )
-		{
-			case C_NEWLINE,
-				 C_SPACE:        parseNewline(inlines);
-			
-			case C_BACKSLASH:    parseBackslash(inlines);
-			
-			case C_BACKTICK:     parseBackticks(inlines);
-			
-			case C_ASTERISK,
-				 C_UNDERSCORE:   parseEmphasis(c, inlines);
-			
-			case C_OPEN_BRACKET: parseLink(inlines);
-			
-			case C_BANG:         parseImage(inlines);
-			
-			case C_LESSTHAN:     parseAutolink(inlines) || parseHtmlTag(inlines);
-			
-			case C_AMPERSAND:    parseEntity(inlines);
-			
-			case _:              parseString(inlines);
-		}
+		case C_NEWLINE,
+			 C_SPACE:        parseNewline(inlines);
+		
+		case C_BACKSLASH:    parseBackslash(inlines);
+		
+		case C_BACKTICK:     parseBackticks(inlines);
+		
+		case C_ASTERISK,
+			 C_UNDERSCORE:   parseEmphasis(c, inlines);
+		
+		case C_OPEN_BRACKET: parseLink(inlines);
+		
+		case C_BANG:         parseImage(inlines);
+		
+		case C_LESSTHAN:     parseAutolink(inlines) || parseHtmlTag(inlines);
+		
+		case C_AMPERSAND:    parseEntity(inlines);
+		
+		case _:              parseString(inlines);
 	}
 	
 	// Attempt to parse a link reference, modifying refmap.
@@ -338,29 +342,29 @@ class InlineParser
 		var res = scanDelims(cc);
 		var numdelims = res.numdelims;
 		
-		if ( numdelims == 0 )
+		if (numdelims == 0)
 		{
 			this.pos = startpos;
 			return false;
 		}
 		
-		if ( res.can_close )
+		if (res.can_close)
 		{
 			// Walk the stack and find a matching opener, if possible
 			var opener = this.emphasis_openers;
-			while ( opener != null )
+			while (opener != null)
 			{
 				// we have a match!
-				if ( opener.cc == cc )
+				if (opener.cc == cc)
 				{
 					// all openers used
-					if ( opener.numdelims <= numdelims )
+					if (opener.numdelims <= numdelims)
 					{
 						this.pos += opener.numdelims;
 						var X : Dynamic -> Dynamic = null;
-						switch ( opener.numdelims )
+						switch (opener.numdelims)
 						{
-							case 3: X = function(x) { return makeStrong([makeEmph(x)]); };
+							case 3: X = function(x) return makeStrong([makeEmph(x)]);
 							case 2: X = makeStrong;
 							case 1, _: X = makeEmph;
 						}
@@ -373,12 +377,22 @@ class InlineParser
 						return true;
 					}
 					// only some openers used
-					else if ( opener.numdelims > numdelims )
+					else if (opener.numdelims > numdelims)
 					{
 						this.pos += numdelims;
 						opener.numdelims -= numdelims;
 						
-						inlines[opener.pos].c = inlines[opener.pos].c.substr(0, opener.numdelims);
+try
+{
+							inlines[opener.pos].c = inlines[opener.pos].c.substr(0, opener.numdelims);
+}
+catch (e : Dynamic)
+{
+	trace(e, haxe.CallStack.toString(haxe.CallStack.exceptionStack()));
+	trace(inlines);
+	trace(opener);
+}
+						
 						
 						var X : Dynamic -> Dynamic = numdelims == 2 ? makeStrong : makeEmph;
 						
@@ -527,16 +541,14 @@ class InlineParser
 		return false;
 	}
 	
-	// Attempt to parse link title (sans quotes), returning the string
-	// or null if no match.
-	function parseLinkTitle( )
+	// Attempt to parse link title (sans quotes),
+	// returning the string or null if no match.
+	function parseLinkTitle( ) : Null<String>
 	{
-		var title = this.match(reLinkTitle);
-		if ( title != null )
+		var title = match(reLinkTitle);
+		return title != null ?
 			// chop off quotes from title and unescape:
-			return unescapeString(title.substr(1, title.length - 2));
-		else
-			return null;
+			unescapeString(title.substr(1, title.length - 2)) : null;
 	}
 
 	// Attempt to parse link destination, returning the string or
@@ -743,7 +755,7 @@ class InlineParser
 	// position in subject and return the match; otherwise return null.
 	function match( re : EReg ) : String
 	{
-		if ( re.match(this.subject.substr(this.pos)) )
+		if (re.match(this.subject.substr(this.pos)))
 		{
 			this.pos += re.matchedPos().pos + re.matched(0).length;
 			return re.matched(0);
@@ -757,8 +769,8 @@ class InlineParser
 	
 	// Scan a sequence of characters == c, and return information about
 	// the number of delimiters and whether they are positioned such that
-	// they can open and/or close emphasis or strong emphasis.  A utility
-	// function for strong/emph parsing.
+	// they can open and/or close emphasis or strong emphasis.
+	// A utility function for strong/emph parsing.
 	function scanDelims( c : Int )
 	{
 		var numdelims : Int = 0;

@@ -2,7 +2,7 @@ LIB_NAME=comark
 LIB_FILE=$(LIB_NAME).zip
 
 upload:
-	haxelib submit comark.zip
+	haxelib submit $(LIB_FILE)
 
 lib: $(LIB_FILE) clean
 

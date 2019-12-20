@@ -1,50 +1,48 @@
-/**
- * ...
- * @author ...
- */
-
-package ;
-
+import utest.Assert;
 import comark.Markdown;
+import comark.GithubMarkdown;
 
-
-class StringTest extends haxe.unit.TestCase
+class StringTest extends utest.Test
 {
-	public static var PATH = '';
+	var specs : Array<SpecCase>;
 	
-	var md : Markdown;
-	//var name : String;
-	
-	var src : String;
-	var res : String;
-	
-	var num : Int;
-	var line : Int;
-	var header : String;
-	
-	public function new( md : Markdown, src : String, res : String, header : String, num : Int, line : Int )
+	public function new( specs : Array<SpecCase> )
 	{
-		this.md = md;
-		//this.name = name;
+		this.specs = specs;
 		
 		super();
-		
-		this.src = src;
-		this.res = res;
-		
-		this.header = header;
-		this.num = num;
-		this.line = line;
 	}
 	
-	public function testCoversion( ) : Void assertEquals(res, md.parse(src));
-	//public function testCoversion( ) : Void assertEquals(src, md.parse(src));
-	
-	override public function setup( ) : Void
+	public function test_baseCases( ) : Void
 	{
-		super.setup();
-		
-		currentTest.classname = '$header $num (line $line)';
-		print(currentTest.classname + " ");
+		var md = new Markdown();
+
+		for (spec in specs)
+			if (!spec.is_github)
+				Assert.equals(spec.html, md.parse(spec.md), null, {
+					fileName: spec.file,
+					lineNumber: spec.line,
+					className: spec.header,
+					methodName: '${spec.example}'
+				});
+				//  '${spec.header} ${spec.example} (line ${spec.line})');
+
+		// Assert.equals(res, md.parse(src), '$header $num (line $line)');
+
 	}
+	public function test_githubCases( ) : Void
+	{
+		var md = new GithubMarkdown(1, true);
+
+		for (spec in specs)
+			if (!spec.is_github)
+				Assert.equals(spec.html, md.parse(spec.md), null, {
+					fileName: spec.file,
+					lineNumber: spec.line,
+					className: spec.header,
+					methodName: '${spec.example}'
+				});
+				//  '${spec.header} ${spec.example} (line ${spec.line})');
+	}
+	
 }

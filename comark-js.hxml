@@ -1,4 +1,5 @@
 -cp src
--cp ../../../devel/duke/lib
--js www/comark.js
+-cp test
+-lib utest
 -main Main
+-js bin/test.js
